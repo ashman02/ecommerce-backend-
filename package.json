@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "deb": "nodemon src/index.js",
+    "dev": "nodemon -r dotenv/config --experimental-json-modules src/index.js",
     "format": "npx prettier --write"
   },
   "keywords": [
@@ -14,7 +14,11 @@
   "author": "chobar02",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.19.2"
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.3.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",
