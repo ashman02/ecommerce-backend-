@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Here I have written backend code for eCommerce project",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "deb": "nodemon src/index.js",
+    "format": "npx prettier --write"
+  },
+  "keywords": [
+    "backend"
+  ],
+  "author": "chobar02",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5"
+  }
+}
