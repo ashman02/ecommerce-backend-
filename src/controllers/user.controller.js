@@ -29,6 +29,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //send the response to frontend
 
   const { fullName, email, phoneNo, password } = req.body;
+  console.log(fullName, email, phoneNo, password)
 
   if (
     [fullName, email, phoneNo, password].some((field) => field?.trim() === "")
@@ -120,5 +121,7 @@ const loginUser = asyncHandler(async (req, res) => {
       ),
     );
 });
+
+//this website will have funtion like youtube where people can make their 
 
 export { registerUser, loginUser };
