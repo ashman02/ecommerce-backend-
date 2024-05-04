@@ -9,6 +9,12 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
+    username : {
+      type : String,
+      required : true,
+      trim : true,
+      unique : true
+    },
     email: {
       type: String,
       required: true,
@@ -25,6 +31,10 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
       unique: true,
+    },
+    avatar: {
+      type : String, //cloudinary url
+      required : true
     },
     refreshToken: {
       type: String,
@@ -50,6 +60,7 @@ userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
+      username : this.username,
       fullName: this.fullName,
       email: this.email,
       phoneNo: this.phoneNo,
