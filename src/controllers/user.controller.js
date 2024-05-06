@@ -30,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //create user
   //send the response to frontend
 
-  const { fullName, email, phoneNo, password } = req.body;
+  const { fullName, username, email, phoneNo, password } = req.body;
 
   if (
     [fullName, username, email, phoneNo, password].some(
@@ -59,7 +59,6 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatar) {
     throw new ApiError(500, "error while uploading avatar on cloudinary");
   }
-  console.log(avatar);
 
   const user = await User.create({
     fullName,
@@ -173,13 +172,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(400, "unauthorized request");
   }
 
+  
   //compare refresh token
   try {
     const decodedToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET,
     );
-
+    
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
@@ -243,7 +243,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { email, username, fullName, phoneNo } = req.body;
-  if (!email && !username && !fullName) {
+  if (!email && !username && !fullName && !phoneNo) {
     throw new ApiError(400, "all fields are empty");
   }
 
@@ -256,7 +256,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     update.username = username;
   }
   if (fullName) {
-    update.fullName = username;
+    update.fullName = fullName;
   }
   if (phoneNo) {
     update.phoneNo = phoneNo;

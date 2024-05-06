@@ -13,7 +13,7 @@ router.route("/refresh-token").post(refreshAccessToken)
 //verified routes
 router.route("/logout").post(verifyJWT, logoutUser)
 router.route("/update-password").post(verifyJWT, updatePassword)
-router.route("/current-user").post(verifyJWT, getCurrentUser)
+router.route("/current-user").get(verifyJWT, getCurrentUser)
 router.route("/update-account").post(verifyJWT, updateAccountDetails)
 router.route("/update-avatar").post(verifyJWT, upload.single("avatar"), updateAvatar)
 

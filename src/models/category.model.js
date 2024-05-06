@@ -11,3 +11,5 @@ const categorySchema = new Schema({
         ref : "Product"
     }]
 })
+
+export const Category = mongoose.model("Category", categorySchema)
