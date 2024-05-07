@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 import { Category } from "../models/category.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -68,5 +68,60 @@ const removeProductFromCategory = asyncHandler(async (req, res) => {
 })
 
 //get products by id
+const getProductByCategory = asyncHandler(async(req, res) => {
+  const {categoryId} = req.params
+  if(!isValidObjectId(categoryId)){
+    throw new ApiError(400, "Category id is should be valid")
+  }
 
-export { createCategory, addProductToCategory, removeProductFromCategory };
+  const category = Category.aggregate([
+    {
+      $match : {
+        _id : new mongoose.Types.ObjectId(categoryId)
+      }
+    },
+    {
+      $lookup : {
+        from : "products",
+        localField : "products",
+        foreignField : "_id",
+        as : "products",
+        pipeline : [
+          {
+            $lookup : {
+              from : "users",
+              localField : "owner",
+              foreignField : "_id",
+              as : "owner",
+              pipeline : [
+                {
+                  $project : {
+                    fullName : 1,
+                    username : 1,
+                    avatar : 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields : {
+              owner : {
+                $first : "$owner"
+              }
+            }
+          }
+        ]
+      }
+    },
+  ])
+
+  if(!category.length){
+    throw new ApiError(400, "No products found under this category")
+  }
+
+  return res.status(200).json(new ApiResponse(200, category, "products under this category fetched successfully"))
+
+})
+
+export { createCategory, addProductToCategory, removeProductFromCategory, getProductByCategory };
