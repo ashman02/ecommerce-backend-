@@ -23,6 +23,7 @@ const productSchema = new Schema({
 
   gender: {
     type: String,
+    lowercase : true
   },
 
   category: [

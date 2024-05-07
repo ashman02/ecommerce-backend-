@@ -23,11 +23,13 @@ app.use(cookieParser())
 
 //routes 
 import userRouter from "./routes/user.routes.js"
-
+import categoryRouter from "./routes/category.routes.js"
+import productRouter from "./routes/product.routes.js"
 
 
 //implementation of routes
 app.use("/api/v1/users", userRouter)
-
+app.use("/api/v1/category", categoryRouter)
+app.use("/api/v1/products", productRouter)
 
 export {app}

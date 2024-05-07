@@ -67,8 +67,7 @@ const removeProductFromCategory = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, category, "product removed successfully"))
 })
 
-//get products by id
-const getProductByCategory = asyncHandler(async(req, res) => {
+const getProductsByCategory = asyncHandler(async(req, res) => {
   const {categoryId} = req.params
   if(!isValidObjectId(categoryId)){
     throw new ApiError(400, "Category id is should be valid")
@@ -124,4 +123,4 @@ const getProductByCategory = asyncHandler(async(req, res) => {
 
 })
 
-export { createCategory, addProductToCategory, removeProductFromCategory, getProductByCategory };
+export { createCategory, addProductToCategory, removeProductFromCategory, getProductsByCategory };
