@@ -6,8 +6,8 @@ const router = Router()
 
 
 router.route("/create").post(verifyJWT, createCategory)
-router.route("/add-product/:productId/:categoryId").post(verifyJWT, addProductToCategory)
-router.route("/remove-product/:productId/:categoryId").delete(verifyJWT, removeProductFromCategory)
+router.route("/add-product/:productId/:categoryId").patch(verifyJWT, addProductToCategory)
+router.route("/remove-product/:productId/:categoryId").patch(verifyJWT, removeProductFromCategory)
 router.route("/:categoryId").get(getProductsByCategory)
 
 export default router

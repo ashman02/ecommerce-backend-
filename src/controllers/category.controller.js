@@ -73,7 +73,7 @@ const getProductsByCategory = asyncHandler(async(req, res) => {
     throw new ApiError(400, "Category id is should be valid")
   }
 
-  const category = Category.aggregate([
+  const category = await Category.aggregate([
     {
       $match : {
         _id : new mongoose.Types.ObjectId(categoryId)
