@@ -73,6 +73,8 @@ const getProductsByCategory = asyncHandler(async(req, res) => {
     throw new ApiError(400, "Category id is should be valid")
   }
 
+  //TODO : when user get products by category sorting and other option are missing
+
   const category = await Category.aggregate([
     {
       $match : {
