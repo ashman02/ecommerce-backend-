@@ -40,6 +40,12 @@ const userSchema = new Schema(
     refreshToken: {
       type: String,
     },
+    cart : [
+      {
+        type : Schema.Types.ObjectId,
+        ref : "Product"
+      }
+    ]
   },
   { timestamps: true },
 );

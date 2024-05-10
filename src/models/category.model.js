@@ -7,7 +7,7 @@ const categorySchema = new Schema({
         unique : true
     },
     products : [{
-        type : mongoose.Types.ObjectId,
+        type : Schema.Types.ObjectId,
         ref : "Product"
     }]
 })

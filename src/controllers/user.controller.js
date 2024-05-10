@@ -306,6 +306,43 @@ const updateAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "avatar updated successfully"));
 });
 
+const addToCart = asyncHandler(async (req, res) => {
+  const {productId} = req.params
+  
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $push : {
+        cart : productId
+      }
+    }, {new : true}
+  )
+
+  if(!user){
+    throw new ApiError(400, "something went wrong while adding the product to the cart")
+  }
+
+  return res.status(200).json(new ApiResponse(200, user, "product added to the cart successfully"))
+})
+
+const removeFromCart = asyncHandler(async (req,res) => {
+  const {productId} = req.params
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $pull : {
+        cart : productId
+      }
+    },{new : true}
+  )
+
+  if(!user){
+    throw new ApiError(400, "error while removing the product from the cart")
+  }
+
+  return res.status(200).json(new ApiResponse(200, user, "product removed from cart"))
+})
+
 export {
   registerUser,
   loginUser,
@@ -314,5 +351,7 @@ export {
   updatePassword,
   getCurrentUser,
   updateAccountDetails,
-  updateAvatar
+  updateAvatar,
+  addToCart,
+  removeFromCart
 };

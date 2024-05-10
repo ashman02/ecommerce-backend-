@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, updateAccountDetails, updateAvatar, updatePassword} from "../controllers/user.controller.js"
+import {addToCart, getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, removeFromCart, updateAccountDetails, updateAvatar, updatePassword} from "../controllers/user.controller.js"
 import {upload} from "../middlewares/multer.middleware.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 
@@ -16,6 +16,10 @@ router.route("/update-password").patch(verifyJWT, updatePassword)
 router.route("/current-user").get(verifyJWT, getCurrentUser)
 router.route("/update-account").patch(verifyJWT, updateAccountDetails)
 router.route("/update-avatar").patch(verifyJWT, upload.single("avatar"), updateAvatar)
+
+router.route("/addto-cart/:productId").patch(verifyJWT, addToCart)
+router.route("/removefrom-cart/:productId").patch(verifyJWT, removeFromCart)
+
 
 
 export default router
