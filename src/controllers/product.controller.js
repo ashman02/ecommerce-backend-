@@ -138,7 +138,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
       },
     },
     {
-      $skip : parseInt((page - 1)) * parseInt(limit)
+      $skip : (parseInt(page) - 1) * parseInt(limit)
     },
     {
       $limit : parseInt(limit)

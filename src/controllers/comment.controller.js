@@ -75,7 +75,7 @@ const getProductComments = asyncHandler(async(req, res) => {
             }
         },
         {
-            $skip : parseInt(page) - 1 * parseInt(limit)
+            $skip : (parseInt(page) - 1) * parseInt(limit)
         },
         {
             $limit : parseInt(limit)
@@ -109,6 +109,8 @@ const getProductComments = asyncHandler(async(req, res) => {
     if(!comments.length){
         throw new ApiError(400, "There are no comments under this video")
     }
+
+    return res.status(200).json(new ApiResponse(200, comments, "comments fetched successfully"))
 })
 
 export {addComment, updateComment, deleteComment, getProductComments}
