@@ -6,6 +6,9 @@ const categorySchema = new Schema({
         required : true,
         unique : true
     },
+    image : {
+        type : String,
+    },
     products : [{
         type : Schema.Types.ObjectId,
         ref : "Product"

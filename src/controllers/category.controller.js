@@ -3,6 +3,7 @@ import { Category } from "../models/category.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const createCategory = asyncHandler(async (req, res) => {
   const { title } = req.body;
@@ -10,8 +11,12 @@ const createCategory = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Title is required");
   }
 
+  const localImagePath = req.file.path
+  const imagePath = await uploadOnCloudinary(localImagePath)
+
   const category = await Category.create({
     title: title,
+    image : imagePath.url
   });
 
   return res

@@ -12,7 +12,7 @@ const toggleProductLike = asyncHandler(async (req, res) => {
 
   const like = await Like.create({
     product: productId,
-    owner: req.user?._id,
+    likedBy: req.user?._id,
   });
 
   if (!like) {
@@ -32,7 +32,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 
   const like = await Like.create({
     comment: commentId,
-    owner: req.user?._id,
+    likedBy: req.user?._id,
   });
 
   if (!like) {
@@ -48,13 +48,13 @@ const getUserLikedProducts = asyncHandler(async (req, res) => {
   const result = await Like.aggregate([
     {
       $match: {
-        owner: new mongoose.Types.ObjectId(req.user?._id),
+        likedBy: new mongoose.Types.ObjectId(req.user?._id),
         product: { $exists: true },
       },
     },
     {
       $sort: {
-        'createdAt': -1,
+        createdAt: -1,
       },
     },
     {
@@ -91,33 +91,69 @@ const getUserLikedProducts = asyncHandler(async (req, res) => {
         ],
       },
     },
+    {
+      $addFields: {
+        product: {
+          $first: "$product",
+        },
+      },
+    },
   ]);
 
-  if(!result){
-    throw new ApiError(400, "User did not liked any product")
+  if (!result.length) {
+    throw new ApiError(400, "User did not liked any product");
   }
 
-
-  return res.status(200).json(new ApiResponse(200, result, "User likes products fetched successfully"))
-
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, result, "User likes products fetched successfully"),
+    );
 });
 
 const getProductLikes = asyncHandler(async (req, res) => {
-    const {productId} = req.params
-    if(!productId){
-        throw new ApiError(400, "product Id is required")
-    }
+  const { productId } = req.params;
+  if (!productId) {
+    throw new ApiError(400, "product Id is required");
+  }
 
-    const totalLikes = await Like.countDocuments({product : productId})
-    const userLikedProduct = await Like.exists({product : productId, user: req.user?._id})
-    const isUserLiked = userLikedProduct !== null;
+  const totalLikes = await Like.countDocuments({ product: productId });
+  const userLikedProduct = await Like.exists({
+    product: productId,
+    user: req.user?._id,
+  });
+  const isUserLiked = userLikedProduct !== null;
 
-    return res.status(200).json(new ApiResponse(200, {totalLikes, isUserLiked}, "Video likes fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { totalLikes, isUserLiked },
+        "Video likes fetched successfully",
+      ),
+    );
+});
 
-// TODO
-//get count of comment likes
-//unlike the video
-//fix error while getting user likes
+const unlikeProduct = asyncHandler(async (req, res) => {
+  const { likeId } = req.params;
 
-export { toggleProductLike, toggleCommentLike, getUserLikedProducts, getProductLikes };
+  await Like.findByIdAndDelete(likeId)
+  return res.status(200).json(new ApiResponse(200, {}, "Unliked the product"));
+});
+
+const unlikeComment = asyncHandler(async (req, res) => {
+  const { likeId } = req.params;
+
+  await Like.findByIdAndDelete(likeId);
+  return res.status(200).json(new ApiResponse(200, {}, "Unliked the comment"));
+});
+
+export {
+  toggleProductLike,
+  toggleCommentLike,
+  getUserLikedProducts,
+  getProductLikes,
+  unlikeProduct,
+  unlikeComment,
+};

@@ -86,6 +86,10 @@ const getAllProducts = asyncHandler(async (req, res) => {
     userId,
   } = req.query;
 
+  if(!query && !userId){
+    throw new ApiError(400, "User id or query is required")
+  }
+
   const sortStage = {};
   if (sortBy) {
     sortStage["$sort"] = {
@@ -102,7 +106,6 @@ const getAllProducts = asyncHandler(async (req, res) => {
   //search query is best way
   const agg = [
     sortStage,
-    //todo : lookups to get review
     {
       $lookup: {
         from: "users",
@@ -147,8 +150,15 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
   //dynamically built query
 
-  //TODO : when we search with userId gender option is not working
   if(userId){
+    if(gender){
+      agg.unshift({
+        $match : {
+          owner : new mongoose.Types.ObjectId(userId),
+          gender : gender
+        }
+      })
+    }
     agg.unshift({
       $match : {
         owner : new mongoose.Types.ObjectId(userId)
