@@ -6,6 +6,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
+
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -343,6 +344,70 @@ const removeFromCart = asyncHandler(async (req,res) => {
   return res.status(200).json(new ApiResponse(200, user, "product removed from cart"))
 })
 
+const userChannelProfile = asyncHandler(async(req, res) => {
+  const {username} = req.params
+  if(!username.trim()){
+    throw new ApiError(400, "Username is missing")
+  }
+
+  const account = await User.aggregate([
+    {
+      $match : {
+        username : username.trim()
+      }
+    },
+    {
+      $lookup : {
+        from : "subscriptions",
+        localField : "_id",
+        foreignField : "account",
+        as : "subscribers",       
+      }
+    },
+    {
+      $lookup : {
+        from : "subscriptions",
+        localField : "_id",
+        foreignField : "subscriber",
+        as : "subscribedTo"
+      }
+    },
+    {
+      $addFields : {
+        subscriberCount : "$subscribers",
+        subscribedToCount : {
+          $size : "$subscribedTo"
+        },
+        isSubscribed : {
+          $cond : {
+            if : {$in : [req.user?._id, "$subscribers.subscriber"]},
+            then : true,
+            else : false
+          }
+        }
+      }
+    },
+    {
+      $project : {
+        fullName : 1,
+        username : 1,
+        avatar : 1,
+        email : 1,
+        subscriberCount : 1,
+        subscribedToCount : 1,
+        isSubscribed : 1,
+      }
+    }
+  ])
+
+
+  if(!account){
+    throw new ApiError(400, "Account does not exists")
+  }
+
+  return res.status(200).json(new ApiResponse(200, account, "User account fetched successfully"))
+})
+
 export {
   registerUser,
   loginUser,
@@ -353,5 +418,6 @@ export {
   updateAccountDetails,
   updateAvatar,
   addToCart,
-  removeFromCart
+  removeFromCart,
+  userChannelProfile
 };

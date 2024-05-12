@@ -129,11 +129,12 @@ const getProductLikes = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        { totalLikes, isUserLiked },
+        { totalLikes, isUserLiked, likeId : userLikedProduct?._id},
         "Video likes fetched successfully",
       ),
     );
 });
+
 
 const unlikeProduct = asyncHandler(async (req, res) => {
   const { likeId } = req.params;
@@ -148,6 +149,8 @@ const unlikeComment = asyncHandler(async (req, res) => {
   await Like.findByIdAndDelete(likeId);
   return res.status(200).json(new ApiResponse(200, {}, "Unliked the comment"));
 });
+
+//TODO : get comment likes as well
 
 export {
   toggleProductLike,

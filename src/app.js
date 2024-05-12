@@ -27,6 +27,7 @@ import categoryRouter from "./routes/category.routes.js"
 import productRouter from "./routes/product.routes.js"
 import commentRouter from "./routes/comment.routes.js"
 import likeRouter from "./routes/like.routes.js"
+import subscriptionRouter from "./routes/subscription.routes.js"
 
 
 //implementation of routes
@@ -35,5 +36,6 @@ app.use("/api/v1/category", categoryRouter)
 app.use("/api/v1/products", productRouter)
 app.use("/api/v1/comments", commentRouter)
 app.use("/api/v1/likes", likeRouter)
+app.use("/api/v1/subscriptions", subscriptionRouter)
 
 export {app}

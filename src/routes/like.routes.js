@@ -14,7 +14,7 @@ const router = Router();
 router
   .route("/product/:productId")
   .post(verifyJWT, toggleProductLike)
-  .get(getProductLikes)
+  .get(verifyJWT,getProductLikes)
 
 router
   .route("/comment/:commentId")

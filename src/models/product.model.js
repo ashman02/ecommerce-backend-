@@ -36,6 +36,6 @@ const productSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-});
+}, {timestamps : true});
 
 export const Product = mongoose.model("Product", productSchema);
