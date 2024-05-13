@@ -252,7 +252,7 @@ const getProductById = asyncHandler(async(req, res) => {
     }
   ])
 
-  if(!product){
+  if(!product.length){
     throw new ApiError(400, "Enter valid product id")
   }
 
