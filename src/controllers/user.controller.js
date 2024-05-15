@@ -3,9 +3,12 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.js";
+import { sendVerificationCode } from "../utils/sendVerificationCode.js";
 import jwt from "jsonwebtoken";
-
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -173,14 +176,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(400, "unauthorized request");
   }
 
-  
   //compare refresh token
   try {
     const decodedToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET,
     );
-    
+
     const user = await User.findById(decodedToken?._id);
 
     if (!user) {
@@ -283,7 +285,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar is required");
   }
 
-  const oldAvatar = req.user?.avatar
+  const oldAvatar = req.user?.avatar;
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
@@ -300,7 +302,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     { new: true },
   ).select("-password -refreshToken");
 
-  deleteFromCloudinary(oldAvatar)
+  deleteFromCloudinary(oldAvatar);
 
   return res
     .status(200)
@@ -308,105 +310,134 @@ const updateAvatar = asyncHandler(async (req, res) => {
 });
 
 const addToCart = asyncHandler(async (req, res) => {
-  const {productId} = req.params
-  
+  const { productId } = req.params;
+
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $push : {
-        cart : productId
-      }
-    }, {new : true}
-  )
+      $push: {
+        cart: productId,
+      },
+    },
+    { new: true },
+  );
 
-  if(!user){
-    throw new ApiError(400, "something went wrong while adding the product to the cart")
+  if (!user) {
+    throw new ApiError(
+      400,
+      "something went wrong while adding the product to the cart",
+    );
   }
 
-  return res.status(200).json(new ApiResponse(200, user, "product added to the cart successfully"))
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "product added to the cart successfully"));
+});
 
-const removeFromCart = asyncHandler(async (req,res) => {
-  const {productId} = req.params
+const removeFromCart = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $pull : {
-        cart : productId
-      }
-    },{new : true}
-  )
+      $pull: {
+        cart: productId,
+      },
+    },
+    { new: true },
+  );
 
-  if(!user){
-    throw new ApiError(400, "error while removing the product from the cart")
+  if (!user) {
+    throw new ApiError(400, "error while removing the product from the cart");
   }
 
-  return res.status(200).json(new ApiResponse(200, user, "product removed from cart"))
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "product removed from cart"));
+});
 
-const userChannelProfile = asyncHandler(async(req, res) => {
-  const {username} = req.params
-  if(!username.trim()){
-    throw new ApiError(400, "Username is missing")
+const userChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  if (!username.trim()) {
+    throw new ApiError(400, "Username is missing");
   }
 
   const account = await User.aggregate([
     {
-      $match : {
-        username : username.trim()
-      }
+      $match: {
+        username: username.trim(),
+      },
     },
     {
-      $lookup : {
-        from : "subscriptions",
-        localField : "_id",
-        foreignField : "account",
-        as : "subscribers",       
-      }
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "account",
+        as: "subscribers",
+      },
     },
     {
-      $lookup : {
-        from : "subscriptions",
-        localField : "_id",
-        foreignField : "subscriber",
-        as : "subscribedTo"
-      }
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
     },
     {
-      $addFields : {
-        subscriberCount : "$subscribers",
-        subscribedToCount : {
-          $size : "$subscribedTo"
+      $addFields: {
+        subscriberCount: "$subscribers",
+        subscribedToCount: {
+          $size: "$subscribedTo",
         },
-        isSubscribed : {
-          $cond : {
-            if : {$in : [req.user?._id, "$subscribers.subscriber"]},
-            then : true,
-            else : false
-          }
-        }
-      }
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
     },
     {
-      $project : {
-        fullName : 1,
-        username : 1,
-        avatar : 1,
-        email : 1,
-        subscriberCount : 1,
-        subscribedToCount : 1,
-        isSubscribed : 1,
-      }
-    }
-  ])
+      $project: {
+        fullName: 1,
+        username: 1,
+        avatar: 1,
+        email: 1,
+        subscriberCount: 1,
+        subscribedToCount: 1,
+        isSubscribed: 1,
+      },
+    },
+  ]);
 
-
-  if(!account){
-    throw new ApiError(400, "Account does not exists")
+  if (!account) {
+    throw new ApiError(400, "Account does not exists");
   }
 
-  return res.status(200).json(new ApiResponse(200, account, "User account fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, account, "User account fetched successfully"));
+});
+
+const testEmail = asyncHandler(async (req, res) => {
+  const { email, username } = req.body;
+
+  //check email it exists or not
+  const existingUserWithEmail = await User.findOne({ email });
+
+  if (existingUserWithEmail) {
+    throw new ApiError(400, "User with this email is already registered");
+  }
+  let verifyCode = Math.floor(100000 + Math.random() * 900000);
+  const emailResponse = await sendVerificationCode(email, username, verifyCode);
+
+  if (!emailResponse) {
+    throw new ApiError(400, "Could not send verification email please sign up again")
+  }
+
+  return res.status(200).json(new ApiResponse(200, emailResponse, "We've just sent a 6-digit verification code to your email. Please check your inbox and enter the code to continue."));
+});
 
 export {
   registerUser,
@@ -419,5 +450,6 @@ export {
   updateAvatar,
   addToCart,
   removeFromCart,
-  userChannelProfile
+  userChannelProfile,
+  testEmail,
 };
