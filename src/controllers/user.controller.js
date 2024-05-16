@@ -34,19 +34,14 @@ const registerUser = asyncHandler(async (req, res) => {
   //create user
   //send the response to frontend
 
-  const { fullName, username, email, phoneNo, password } = req.body;
+  const { fullName, username, email, password } = req.body;
 
   if (
-    [fullName, username, email, phoneNo, password].some(
+    [fullName, username, email, password].some(
       (field) => field?.trim() === "",
     )
   ) {
     throw new ApiError(400, "All fields all required");
-  }
-
-  const avatarLocalPath = req.file?.path;
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "avatar is required");
   }
 
   //check if user exits
@@ -58,19 +53,12 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "User with email or phone no. already exists");
   }
 
-  //upload avatar on cloudinary
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-  if (!avatar) {
-    throw new ApiError(500, "error while uploading avatar on cloudinary");
-  }
 
   const user = await User.create({
     fullName,
     username,
     email,
-    phoneNo,
     password,
-    avatar: avatar.url,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -439,6 +427,18 @@ const testEmail = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, emailResponse, "We've just sent a 6-digit verification code to your email. Please check your inbox and enter the code to continue."));
 });
 
+const checkUsername = asyncHandler(async (req, res) => {
+  const {username} = req.params
+  const userByUsername = await User.findOne({username,})
+
+  if(userByUsername){
+    console.log("user is already here")
+    throw new ApiError(400, "User with this username is already registered")
+  }
+
+  return res.status(201).json(new ApiResponse(201, {}, "Username is available"))
+})
+
 export {
   registerUser,
   loginUser,
@@ -452,4 +452,5 @@ export {
   removeFromCart,
   userChannelProfile,
   testEmail,
+  checkUsername,
 };

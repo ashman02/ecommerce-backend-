@@ -13,7 +13,6 @@ const userSchema = new Schema(
       type : String,
       required : true,
       trim : true,
-      lowercase : true,
       unique : true
     },
     email: {
@@ -24,8 +23,6 @@ const userSchema = new Schema(
     },
     phoneNo: {
       type: Number,
-      required: true,
-      unique: true,
       trim: true,
     },
     password: {
@@ -35,7 +32,6 @@ const userSchema = new Schema(
     },
     avatar: {
       type : String, //cloudinary url
-      required : true
     },
     refreshToken: {
       type: String,
