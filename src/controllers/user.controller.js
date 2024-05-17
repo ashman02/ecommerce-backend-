@@ -46,7 +46,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //check if user exits
   const existedUser = await User.findOne({
-    $or: [{ email }, { phoneNo }],
+    $or: [{ email }],
   });
 
   if (existedUser) {
@@ -71,7 +71,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(401, createdUser, "User registered successfully"));
+    .json(new ApiResponse(201, createdUser, "User registered successfully"));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -432,7 +432,6 @@ const checkUsername = asyncHandler(async (req, res) => {
   const userByUsername = await User.findOne({username,})
 
   if(userByUsername){
-    console.log("user is already here")
     throw new ApiError(400, "User with this username is already registered")
   }
 
