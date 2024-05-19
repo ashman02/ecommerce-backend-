@@ -78,18 +78,18 @@ const loginUser = asyncHandler(async (req, res) => {
   //check user details
   //check password
   //give access and refresh token
-  const { email, phoneNo, password } = req.body;
+  const { identifier, password } = req.body;
 
-  if (!email && !phoneNo) {
-    throw new ApiError(400, "email or phone is required to login");
+  if (!identifier) {
+    throw new ApiError(400, "email or username is required to login");
   }
 
   const user = await User.findOne({
-    $or: [{ email }, { phoneNo }],
+    $or: [{ email : identifier }, { username : identifier }],
   });
 
   if (!user) {
-    throw new ApiError(400, "user with email or phone no. not found");
+    throw new ApiError(400, "user with email or username not found");
   }
 
   //check for password
