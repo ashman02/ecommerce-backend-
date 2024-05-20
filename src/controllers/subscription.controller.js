@@ -16,7 +16,7 @@ const toggleSubscribe = asyncHandler(async (req, res) => {
         throw new ApiError(500, "error while subscribing to the account")
     }
 
-    return res.status(200).json(new ApiResponse(200, subscribe, "Subscribed successfully"))
+    return res.status(200).json(new ApiResponse(200, subscribe, "Followed successfully"))
 })
 
 const subscribedTo = asyncHandler(async(req, res) => {
