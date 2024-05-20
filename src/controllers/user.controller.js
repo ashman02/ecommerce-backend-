@@ -373,7 +373,9 @@ const userChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $addFields: {
-        subscriberCount: "$subscribers",
+        subscriberCount: {
+          $size: "$subscribers",
+        },
         subscribedToCount: {
           $size: "$subscribedTo",
         },
@@ -399,7 +401,7 @@ const userChannelProfile = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (!account) {
+  if (!account.length) {
     throw new ApiError(400, "Account does not exists");
   }
 
