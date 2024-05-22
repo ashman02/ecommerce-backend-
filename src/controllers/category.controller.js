@@ -130,4 +130,9 @@ const getProductsByCategory = asyncHandler(async(req, res) => {
 
 })
 
-export { createCategory, addProductToCategory, removeProductFromCategory, getProductsByCategory };
+const getAllCategories = asyncHandler(async (req, res) => {
+  const categories = await Category.find({});
+  return res.status(200).json(new ApiResponse(200, categories, "categories fetched successfully"));
+})
+
+export { createCategory, addProductToCategory, removeProductFromCategory, getProductsByCategory, getAllCategories };

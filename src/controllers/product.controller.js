@@ -86,8 +86,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
     userId,
   } = req.query;
 
-  if(!query && !userId){
-    throw new ApiError(400, "User id or query is required")
+  if (!query && !userId) {
+    throw new ApiError(400, "User id or query is required");
   }
 
   const sortStage = {};
@@ -141,29 +141,29 @@ const getAllProducts = asyncHandler(async (req, res) => {
       },
     },
     {
-      $skip : (parseInt(page) - 1) * parseInt(limit)
+      $skip: (parseInt(page) - 1) * parseInt(limit),
     },
     {
-      $limit : parseInt(limit)
-    }   
+      $limit: parseInt(limit),
+    },
   ];
 
   //dynamically built query
 
-  if(userId){
-    if(gender){
+  if (userId) {
+    if (gender) {
       agg.unshift({
-        $match : {
-          owner : new mongoose.Types.ObjectId(userId),
-          gender : gender
-        }
-      })
+        $match: {
+          owner: new mongoose.Types.ObjectId(userId),
+          gender: gender,
+        },
+      });
     }
     agg.unshift({
-      $match : {
-        owner : new mongoose.Types.ObjectId(userId)
-      }
-    })
+      $match: {
+        owner: new mongoose.Types.ObjectId(userId),
+      },
+    });
   }
 
   if (!userId && query) {
@@ -213,122 +213,178 @@ const getAllProducts = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, result, "products fetched successfully"));
 });
 
-const getProductById = asyncHandler(async(req, res) => {
-  const {productId} = req.params
+const getProductById = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
 
-  if(!productId){
-    throw new ApiError(400, "Product id is required")
+  if (!productId) {
+    throw new ApiError(400, "Product id is required");
   }
 
   const product = await Product.aggregate([
     {
-      $match : {
-        _id : new mongoose.Types.ObjectId(productId)
-      }
+      $match: {
+        _id: new mongoose.Types.ObjectId(productId),
+      },
     },
     {
-      $lookup : {
-        from : "users",
-        localField : "owner",
-        foreignField : "_id",
-        as : "owner",
-        pipeline : [
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
           {
-            $project : {
-              username : 1,
-              fullName : 1,
-              avatar : 1,
-            }
-          }
-        ]
-      }
+            $project: {
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
     },
     {
-      $addFields : {
-        owner : {
-          $first : "$owner"
-        }
-      }
-    }
-  ])
+      $addFields: {
+        owner: {
+          $first: "$owner",
+        },
+      },
+    },
+  ]);
 
-  if(!product.length){
-    throw new ApiError(400, "Enter valid product id")
-  }
-
-  return res.status(200).json(new ApiResponse(200, product, "Product fetched successfully"))
-})
-
-const updateProductDetails = asyncHandler(async(req, res) => {
-  const {title, description, gender, price} = req.body
-  const {productId} = req.params
-
-  if(!title && !description && !gender && !price){
-    throw new ApiError(400, "All fields are empty to update")
+  if (!product.length) {
+    throw new ApiError(400, "Enter valid product id");
   }
 
-  const update = {}
-  if(title){
-    update.title = title
+  return res
+    .status(200)
+    .json(new ApiResponse(200, product, "Product fetched successfully"));
+});
+
+const updateProductDetails = asyncHandler(async (req, res) => {
+  const { title, description, gender, price } = req.body;
+  const { productId } = req.params;
+
+  if (!title && !description && !gender && !price) {
+    throw new ApiError(400, "All fields are empty to update");
   }
-  if(description){
-    update.description = description
+
+  const update = {};
+  if (title) {
+    update.title = title;
   }
-  if(gender){
-    update.gender = gender
+  if (description) {
+    update.description = description;
   }
-  if(price){
-    update.price = price
+  if (gender) {
+    update.gender = gender;
   }
-  
+  if (price) {
+    update.price = price;
+  }
+
   const product = await Product.findByIdAndUpdate(
     productId,
     {
-      $set : update
-    }, {new : true}
-  )
+      $set: update,
+    },
+    { new: true },
+  );
 
-  if(!product){
-    throw new ApiError(400, "Product not found while updating the product")
+  if (!product) {
+    throw new ApiError(400, "Product not found while updating the product");
   }
 
-  return res.status(200).json(new ApiResponse(200, product, "Product details updated successfully"))
-  
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, product, "Product details updated successfully"),
+    );
+});
 
-})
-
-const deleteProduct = asyncHandler(async(req, res) => {
-  const {productId} = req.params
+const deleteProduct = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
 
   //we have to delete all the images from cloudinary too
-  if(!productId){
-    throw new ApiError(400, "Enter product Id to delete product")
+  if (!productId) {
+    throw new ApiError(400, "Enter product Id to delete product");
   }
 
-  const product = await Product.findById(productId)
-  if(!product){
-    throw new ApiError(400, "Enter valid product id to delete")
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(400, "Enter valid product id to delete");
   }
-  
+
   product.image.forEach((img) => {
-    deleteFromCloudinary(img)
-  })
+    deleteFromCloudinary(img);
+  });
 
   product.category.forEach(async (cat) => {
-    await Category.findByIdAndUpdate(
-      cat,
-      {
-        $pull : {
-          products : product._id
-        }
-      }
-    )
-  })
+    await Category.findByIdAndUpdate(cat, {
+      $pull: {
+        products: product._id,
+      },
+    });
+  });
 
-  await Product.findByIdAndDelete(product._id)
+  await Product.findByIdAndDelete(product._id);
 
-  return res.status(200).json(new ApiResponse(200, {}, "product deleted successfully"))
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "product deleted successfully"));
+});
 
-})
+const homePageProducts = asyncHandler(async (req, res) => {
+  
+  const products = await Product.aggregate([
+    {
+      $match: {},
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        owner: {
+          $first: "$owner",
+        },
+      },
+    },
+  ]);
 
-export { createProduct, getAllProducts, getProductById, updateProductDetails, deleteProduct };
+  if (!products.length) {
+    throw new ApiError(400, "No product found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, products, "Products fetched successfully"));
+});
+
+export {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProductDetails,
+  deleteProduct,
+  homePageProducts,
+};
