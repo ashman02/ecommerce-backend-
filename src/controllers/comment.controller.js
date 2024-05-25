@@ -54,7 +54,6 @@ const deleteComment = asyncHandler(async (req, res) => {
     const {commentId} = req.params
 
     const comment = await Comment.findByIdAndDelete(commentId)
-    console.log(comment)
 
     return res.status(200).json(new ApiResponse(200, {}, "comment deleted successfully"))
 })
@@ -107,7 +106,7 @@ const getProductComments = asyncHandler(async(req, res) => {
     ])
 
     if(!comments.length){
-        throw new ApiError(400, "There are no comments under this video")
+        throw new ApiError(400, "There are no comments under this product")
     }
 
     return res.status(200).json(new ApiResponse(200, comments, "comments fetched successfully"))

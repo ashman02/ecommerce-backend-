@@ -9,7 +9,7 @@ router.route("/:productId")
     .post(addComment)
     .get(getProductComments)
 
-router.route("/:commentId")
+router.route("/update/:commentId")
     .patch(updateComment)
     .delete(deleteComment)
 
