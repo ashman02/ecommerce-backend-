@@ -308,7 +308,7 @@ const addToCart = asyncHandler(async (req, res) => {
       },
     },
     { new: true },
-  );
+  ).select("-password -refreshToken");
 
   if (!user) {
     throw new ApiError(
@@ -332,7 +332,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
       },
     },
     { new: true },
-  );
+  ).select("-password -refreshToken");
 
   if (!user) {
     throw new ApiError(400, "error while removing the product from the cart");
@@ -342,6 +342,62 @@ const removeFromCart = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "product removed from cart"));
 });
+
+const getCartItmes = asyncHandler(async (req, res) => {
+  const cartItems = await User.aggregate([
+    {
+      $match : {
+        _id : new mongoose.Types.ObjectId(req.user?._id)
+      }
+    },
+    {
+      $lookup : {
+        from : "products",
+        localField : "cart",
+        foreignField : "_id",
+        as : "cart",
+        pipeline : [
+          {
+            $lookup : {
+              from : "users",
+              localField : "owner",
+              foreignField : "_id",
+              as : "owner",
+              pipeline : [
+                {
+                  $project : {
+                    username : 1,
+                    fullName : 1,
+                    avatar : 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields : {
+              owner : {
+                $first : "$owner"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      $project : {
+        cart : 1
+      }
+    }
+  ])
+
+
+  if(cartItems.length === 0) {
+    throw new ApiError(400, "Cart is empty")
+  }
+
+  return res.status(200).json(new ApiResponse(200, cartItems[0], "Cart items fetched successfully"))
+})
 
 const userChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
@@ -451,6 +507,7 @@ export {
   updateAvatar,
   addToCart,
   removeFromCart,
+  getCartItmes,
   userChannelProfile,
   testEmail,
   checkUsername,
