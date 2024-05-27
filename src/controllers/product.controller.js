@@ -14,9 +14,12 @@ const createProduct = asyncHandler(async (req, res) => {
   if ([title, description, price].some((field) => field.trim() === "")) {
     throw new ApiError(400, "title, description and price is required");
   }
+
   if (!category.length) {
     throw new ApiError(400, "Please include atleast one category");
   }
+
+  let catArray = JSON.parse(category)
 
   //we will recieve array of files
   if (req.files.length < 3) {
@@ -40,7 +43,7 @@ const createProduct = asyncHandler(async (req, res) => {
     image: cloudinaryFilesPath,
     price,
     gender,
-    category,
+    category : catArray,
     owner: req.user?._id,
   });
 
@@ -50,7 +53,8 @@ const createProduct = asyncHandler(async (req, res) => {
 
   //add product to it categories
   //we have made wrote controller for that you can use that one too
-  category.forEach(async (cat) => {
+  catArray.forEach(async (cat) => {
+    console.log(cat)
     try {
       await Category.findByIdAndUpdate(
         cat,

@@ -6,7 +6,7 @@ import { createProduct, deleteProduct, getAllProducts, getProductById, homePageP
 
 const router = Router()
 
-router.route("/create-product").post(verifyJWT, upload.array("product-images", 6), createProduct)
+router.route("/create-product").post(verifyJWT, upload.array("productImages", 6), createProduct)
 router.route("/get-products").get(getAllProducts)
 router.route("/product/:productId")
     .get(getProductById)
