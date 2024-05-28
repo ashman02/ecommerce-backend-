@@ -37,9 +37,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const { fullName, username, email, password } = req.body;
 
   if (
-    [fullName, username, email, password].some(
-      (field) => field?.trim() === "",
-    )
+    [fullName, username, email, password].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All fields all required");
   }
@@ -52,7 +50,6 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existedUser) {
     throw new ApiError(400, "User with email or phone no. already exists");
   }
-
 
   const user = await User.create({
     fullName,
@@ -85,7 +82,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({
-    $or: [{ email : identifier }, { username : identifier }],
+    $or: [{ email: identifier }, { username: identifier }],
   });
 
   if (!user) {
@@ -233,24 +230,21 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { email, username, fullName, phoneNo } = req.body;
-  if (!email && !username && !fullName && !phoneNo) {
+  const { username, fullName, bio } = req.body;
+  if (!username && !fullName && !bio) {
     throw new ApiError(400, "all fields are empty");
   }
 
   const update = {};
 
-  if (email) {
-    update.email = email;
-  }
   if (username) {
     update.username = username;
   }
   if (fullName) {
     update.fullName = fullName;
   }
-  if (phoneNo) {
-    update.phoneNo = phoneNo;
+  if (bio) {
+    update.bio = bio;
   }
 
   const user = await User.findByIdAndUpdate(
@@ -273,7 +267,11 @@ const updateAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "avatar is required");
   }
 
-  const oldAvatar = req.user?.avatar;
+  let oldAvatar = null;
+
+  if (req.user?.avatar) {
+    oldAvatar = req.user?.avatar;
+  }
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
@@ -290,7 +288,9 @@ const updateAvatar = asyncHandler(async (req, res) => {
     { new: true },
   ).select("-password -refreshToken");
 
-  deleteFromCloudinary(oldAvatar);
+  if (oldAvatar !== null) {
+    deleteFromCloudinary(oldAvatar);
+  }
 
   return res
     .status(200)
@@ -346,58 +346,61 @@ const removeFromCart = asyncHandler(async (req, res) => {
 const getCartItmes = asyncHandler(async (req, res) => {
   const cartItems = await User.aggregate([
     {
-      $match : {
-        _id : new mongoose.Types.ObjectId(req.user?._id)
-      }
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user?._id),
+      },
     },
     {
-      $lookup : {
-        from : "products",
-        localField : "cart",
-        foreignField : "_id",
-        as : "cart",
-        pipeline : [
+      $lookup: {
+        from: "products",
+        localField: "cart",
+        foreignField: "_id",
+        as: "cart",
+        pipeline: [
           {
-            $lookup : {
-              from : "users",
-              localField : "owner",
-              foreignField : "_id",
-              as : "owner",
-              pipeline : [
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
                 {
-                  $project : {
-                    username : 1,
-                    fullName : 1,
-                    avatar : 1
-                  }
-                }
-              ]
-            }
+                  $project: {
+                    username: 1,
+                    fullName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
           },
           {
-            $addFields : {
-              owner : {
-                $first : "$owner"
-              }
-            }
-          }
-        ]
-      }
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
     },
     {
-      $project : {
-        cart : 1
-      }
-    }
-  ])
+      $project: {
+        cart: 1,
+      },
+    },
+  ]);
 
-
-  if(cartItems.length === 0) {
-    throw new ApiError(400, "Cart is empty")
+  if (cartItems.length === 0) {
+    throw new ApiError(400, "Cart is empty");
   }
 
-  return res.status(200).json(new ApiResponse(200, cartItems[0], "Cart items fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, cartItems[0], "Cart items fetched successfully"),
+    );
+});
 
 const userChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
@@ -450,6 +453,7 @@ const userChannelProfile = asyncHandler(async (req, res) => {
         username: 1,
         avatar: 1,
         email: 1,
+        bio: 1,
         subscriberCount: 1,
         subscribedToCount: 1,
         isSubscribed: 1,
@@ -479,22 +483,35 @@ const testEmail = asyncHandler(async (req, res) => {
   const emailResponse = await sendVerificationCode(email, username, verifyCode);
 
   if (!emailResponse) {
-    throw new ApiError(400, "Could not send verification email please sign up again")
+    throw new ApiError(
+      400,
+      "Could not send verification email please sign up again",
+    );
   }
 
-  return res.status(200).json(new ApiResponse(200, emailResponse, "We've just sent a 6-digit verification code to your email. Please check your inbox and enter the code to continue."));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        emailResponse,
+        "We've just sent a 6-digit verification code to your email. Please check your inbox and enter the code to continue.",
+      ),
+    );
 });
 
 const checkUsername = asyncHandler(async (req, res) => {
-  const {username} = req.params
-  const userByUsername = await User.findOne({username,})
+  const { username } = req.params;
+  const userByUsername = await User.findOne({ username });
 
-  if(userByUsername){
-    throw new ApiError(400, "User with this username is already registered")
+  if (userByUsername) {
+    throw new ApiError(400, "User with this username is already registered");
   }
 
-  return res.status(201).json(new ApiResponse(201, {}, "Username is available"))
-})
+  return res
+    .status(201)
+    .json(new ApiResponse(201, {}, "Username is available"));
+});
 
 export {
   registerUser,
