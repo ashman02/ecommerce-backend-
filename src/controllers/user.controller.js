@@ -313,7 +313,7 @@ const addToCart = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(
       400,
-      "something went wrong while adding the product to the cart",
+      "something went wrong while saving the product",
     );
   }
 
@@ -340,7 +340,7 @@ const removeFromCart = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "product removed from cart"));
+    .json(new ApiResponse(200, user, "product removed from saved"));
 });
 
 const getCartItmes = asyncHandler(async (req, res) => {
@@ -513,6 +513,28 @@ const checkUsername = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, {}, "Username is available"));
 });
 
+const getUsersWithName = asyncHandler(async (req, res) => {
+  const {query} = req.query
+  if(!query){
+    throw new ApiError(400, "Name is required")
+  }
+
+  const users = await User.find({
+    $or : [
+      {username : {$regex : query, $options : "i"}},
+      {fullName : {$regex : query, $options : "i"}}
+    ]
+  }).select("-password -refreshToken").exec()
+
+  
+
+  if(!users){
+    throw new ApiError(404, "User not found")
+  }
+
+  return res.status(200).json(new ApiResponse(200, users, "User fetched successfully"))
+})
+
 export {
   registerUser,
   loginUser,
@@ -528,4 +550,5 @@ export {
   userChannelProfile,
   testEmail,
   checkUsername,
+  getUsersWithName
 };

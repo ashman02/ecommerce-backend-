@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {addToCart, checkUsername, getCartItmes, getCurrentUser, loginUser, logoutUser, refreshAccessToken, registerUser, removeFromCart, testEmail, updateAccountDetails, updateAvatar, updatePassword, userChannelProfile} from "../controllers/user.controller.js"
+import {addToCart, checkUsername, getCartItmes, getCurrentUser, getUsersWithName, loginUser, logoutUser, refreshAccessToken, registerUser, removeFromCart, testEmail, updateAccountDetails, updateAvatar, updatePassword, userChannelProfile} from "../controllers/user.controller.js"
 import {upload} from "../middlewares/multer.middleware.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 
@@ -24,6 +24,8 @@ router.route("/get-cart-items").get(verifyJWT, getCartItmes)
 router.route("/get-account/:username").get(verifyJWT, userChannelProfile)
 router.route("/test-email").post(testEmail)
 router.route("/check-username/:username").get(checkUsername)
+
+router.route("/get-users").get(getUsersWithName)
 
 
 
