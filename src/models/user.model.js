@@ -24,6 +24,9 @@ const userSchema = new Schema(
       unique: true,
       trim: true,
     },
+    location : {
+      type : String,
+    },
     phoneNo: {
       type: Number,
       trim: true,

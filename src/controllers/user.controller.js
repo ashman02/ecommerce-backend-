@@ -230,7 +230,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { username, fullName, bio } = req.body;
+  const { username, fullName, bio, location } = req.body;
   if (!username && !fullName && !bio) {
     throw new ApiError(400, "all fields are empty");
   }
@@ -245,6 +245,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   }
   if (bio) {
     update.bio = bio;
+  }
+  if(location){
+    update.location = location
   }
 
   const user = await User.findByIdAndUpdate(
@@ -454,6 +457,7 @@ const userChannelProfile = asyncHandler(async (req, res) => {
         avatar: 1,
         email: 1,
         bio: 1,
+        location : 1,
         subscriberCount: 1,
         subscribedToCount: 1,
         isSubscribed: 1,
@@ -522,7 +526,8 @@ const getUsersWithName = asyncHandler(async (req, res) => {
   const users = await User.find({
     $or : [
       {username : {$regex : query, $options : "i"}},
-      {fullName : {$regex : query, $options : "i"}}
+      {fullName : {$regex : query, $options : "i"}},
+      {location : {$regex : query, $options : "i"}}
     ]
   }).select("-password -refreshToken").exec()
 

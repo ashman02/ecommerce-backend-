@@ -120,7 +120,7 @@ const getProductLikes = asyncHandler(async (req, res) => {
   const totalLikes = await Like.countDocuments({ product: productId });
   const userLikedProduct = await Like.exists({
     product: productId,
-    user: req.user?._id,
+    likedBy: req.user?._id,
   });
   const isUserLiked = userLikedProduct !== null;
 
