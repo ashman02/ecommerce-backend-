@@ -122,7 +122,7 @@ const getProductsByCategory = asyncHandler(async(req, res) => {
     },
   ])
 
-  if(!category.length){
+  if(!category[0].products.length){
     throw new ApiError(400, "No products found under this category")
   }
 

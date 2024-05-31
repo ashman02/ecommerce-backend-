@@ -531,9 +531,8 @@ const getUsersWithName = asyncHandler(async (req, res) => {
     ]
   }).select("-password -refreshToken").exec()
 
-  
 
-  if(!users){
+  if(!users.length){
     throw new ApiError(404, "User not found")
   }
 
