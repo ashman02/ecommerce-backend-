@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "chobar-cart-api",
   "version": "1.0.0",
   "description": "Here I have written backend code for eCommerce project",
   "main": "index.js",

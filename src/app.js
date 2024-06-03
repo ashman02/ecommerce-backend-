@@ -3,9 +3,10 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
-const allowedOrigins = ['https://chobarcart.netlify.app']
+
 app.use(cors({
-    origin : allowedOrigins,
+    origin : 'https://chobarcart.netlify.app',
+    methods : ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials : true
 }))
 
