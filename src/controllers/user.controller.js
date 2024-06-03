@@ -112,7 +112,7 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite : 'None',
-    domain : '.chobarcart.com'
+    domain : '.https://chobarcart.netlify.app/'
   };
 
   return res
