@@ -18,6 +18,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
+    
 
     return { accessToken, refreshToken };
   } catch (error) {
@@ -110,6 +111,8 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
+    sameSite : 'none',
+    domain : '.chobarcart.com'
   };
 
   return res
