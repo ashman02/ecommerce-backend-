@@ -54,7 +54,6 @@ const createProduct = asyncHandler(async (req, res) => {
   //add product to it categories
   //we have made wrote controller for that you can use that one too
   catArray.forEach(async (cat) => {
-    console.log(cat)
     try {
       await Category.findByIdAndUpdate(
         cat,

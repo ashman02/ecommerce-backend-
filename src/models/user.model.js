@@ -27,10 +27,6 @@ const userSchema = new Schema(
     location : {
       type : String,
     },
-    phoneNo: {
-      type: Number,
-      trim: true,
-    },
     password: {
       type: String,
       required: [true, "Password is required"],
@@ -72,7 +68,6 @@ userSchema.methods.generateAccessToken = function () {
       username : this.username,
       fullName: this.fullName,
       email: this.email,
-      phoneNo: this.phoneNo,
     },
     process.env.ACCESS_TOKEN_SECRET,
     {

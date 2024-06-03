@@ -42,15 +42,16 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields all required");
   }
 
+  
   //check if user exits
   const existedUser = await User.findOne({
     $or: [{ email }],
   });
-
+  
   if (existedUser) {
-    throw new ApiError(400, "User with email or phone no. already exists");
+    throw new ApiError(400, "User with email already exists");
   }
-
+  
   const user = await User.create({
     fullName,
     username,
@@ -58,10 +59,11 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
   });
 
+  
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken",
   );
-
+  
   if (!createdUser) {
     throw new ApiError(500, "Error while registering the user");
   }
@@ -286,7 +288,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     {
       $set: {
         avatar: avatar.url,
-      },
+      }
     },
     { new: true },
   ).select("-password -refreshToken");
@@ -498,7 +500,7 @@ const testEmail = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        emailResponse,
+        verifyCode,
         "We've just sent a 6-digit verification code to your email. Please check your inbox and enter the code to continue.",
       ),
     );
