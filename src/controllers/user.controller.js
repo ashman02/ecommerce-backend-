@@ -112,7 +112,7 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite : 'None',
-    domain : '.netlify.app'
+    domain : '.vercel.app'
   };
 
   return res

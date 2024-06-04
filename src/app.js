@@ -3,7 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
-const allowedOrigins = ["http://localhost:5173", "https://chobarcart.netlify.app"]
+const allowedOrigins = ["http://localhost:5173", "https://chobarcart.vercel.app"]
 app.use(cors({
     origin : allowedOrigins,
     credentials : true
