@@ -6,7 +6,6 @@ const app = express()
 const allowedOrigins = ["http://localhost:5173", "https://chobarcart.netlify.app"]
 app.use(cors({
     origin : allowedOrigins,
-    methods : ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials : true
 }))
 
