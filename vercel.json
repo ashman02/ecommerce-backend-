@@ -6,10 +6,10 @@
         "use": "@vercel/node"
       }
     ],
-    "routes": [
+    "redirects": [
       {
-        "src": "/users/current-user",
-        "dest": "src/routes.user.routes.js"
+        "source": "/api/v1/users",
+        "destination": "/api/v1/users/current-user"
       }
     ]
   }
