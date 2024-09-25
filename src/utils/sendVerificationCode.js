@@ -1,4 +1,4 @@
-import { resend } from "./resend.js";
+
 import { ApiError } from "./ApiError.js";
 import nodemailer from "nodemailer";
 

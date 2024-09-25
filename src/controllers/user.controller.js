@@ -18,7 +18,6 @@ const generateAccessAndRefreshToken = async (userId) => {
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
-    
 
     return { accessToken, refreshToken };
   } catch (error) {
@@ -43,16 +42,15 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields all required");
   }
 
-  
   //check if user exits
   const existedUser = await User.findOne({
     $or: [{ email }],
   });
-  
+
   if (existedUser) {
     throw new ApiError(400, "User with email already exists");
   }
-  
+
   const user = await User.create({
     fullName,
     username,
@@ -60,11 +58,10 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
   });
 
-  
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken",
   );
-  
+
   if (!createdUser) {
     throw new ApiError(500, "Error while registering the user");
   }
@@ -108,28 +105,31 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken",
   );
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-    sameSite : 'None',
-    domain : '.vercel.app'
-  };
+  // if you are deploying your backend and frontend on the same domain
+  // const options = {
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite : 'None',
+  //   domain : '.domain name'
+  // };
 
-  return res
-    .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          user: loggedInUser,
-          accessToken,
-          refreshToken,
-        },
-        "user logged in successfully",
-      ),
-    );
+  return (
+    res
+      .status(200)
+      // .cookie("accessToken", accessToken, options)
+      // .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          {
+            user: loggedInUser,
+            accessToken,
+            refreshToken,
+          },
+          "user logged in successfully",
+        ),
+      )
+  );
 });
 
 //this website will have funtion like youtube where people can make their
@@ -188,15 +188,16 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       user?._id,
     );
 
-    const options = {
-      httpOnly: true,
-      secure: true,
-    };
+  
+    // const options = {
+    //   httpOnly: true,
+    //   secure: true,
+    // };
 
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", refreshToken, options)
+      // .cookie("accessToken", accessToken, options)
+      // .cookie("refreshToken", refreshToken, options)
       .json(
         new ApiResponse(
           200,
@@ -205,7 +206,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         ),
       );
   } catch (error) {
-    throw new ApiError(200, error?.message || "Invalid refresh token");
+    throw new ApiError(500, error?.message || "Invalid refresh token");
   }
 });
 
@@ -251,8 +252,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   if (bio) {
     update.bio = bio;
   }
-  if(location){
-    update.location = location
+  if (location) {
+    update.location = location;
   }
 
   const user = await User.findByIdAndUpdate(
@@ -291,7 +292,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     {
       $set: {
         avatar: avatar.url,
-      }
+      },
     },
     { new: true },
   ).select("-password -refreshToken");
@@ -319,10 +320,7 @@ const addToCart = asyncHandler(async (req, res) => {
   ).select("-password -refreshToken");
 
   if (!user) {
-    throw new ApiError(
-      400,
-      "something went wrong while saving the product",
-    );
+    throw new ApiError(400, "something went wrong while saving the product");
   }
 
   return res
@@ -462,7 +460,7 @@ const userChannelProfile = asyncHandler(async (req, res) => {
         avatar: 1,
         email: 1,
         bio: 1,
-        location : 1,
+        location: 1,
         subscriberCount: 1,
         subscribedToCount: 1,
         isSubscribed: 1,
@@ -523,26 +521,29 @@ const checkUsername = asyncHandler(async (req, res) => {
 });
 
 const getUsersWithName = asyncHandler(async (req, res) => {
-  const {query} = req.query
-  if(!query){
-    throw new ApiError(400, "Name is required")
+  const { query } = req.query;
+  if (!query) {
+    throw new ApiError(400, "Name is required");
   }
 
   const users = await User.find({
-    $or : [
-      {username : {$regex : query, $options : "i"}},
-      {fullName : {$regex : query, $options : "i"}},
-      {location : {$regex : query, $options : "i"}}
-    ]
-  }).select("-password -refreshToken").exec()
+    $or: [
+      { username: { $regex: query, $options: "i" } },
+      { fullName: { $regex: query, $options: "i" } },
+      { location: { $regex: query, $options: "i" } },
+    ],
+  })
+    .select("-password -refreshToken")
+    .exec();
 
-
-  if(!users.length){
-    throw new ApiError(404, "User not found")
+  if (!users.length) {
+    throw new ApiError(404, "User not found");
   }
 
-  return res.status(200).json(new ApiResponse(200, users, "User fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, users, "User fetched successfully"));
+});
 
 export {
   registerUser,
@@ -559,5 +560,5 @@ export {
   userChannelProfile,
   testEmail,
   checkUsername,
-  getUsersWithName
+  getUsersWithName,
 };
